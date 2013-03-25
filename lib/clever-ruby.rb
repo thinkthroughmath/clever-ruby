@@ -163,6 +163,9 @@ module Clever
   end
 
   def self.invalid_request_error(error, rcode, rbody, error_obj)
+    puts "error = #{error.inspect}"
+    puts "error message = #{error[:message]}"
+    puts "error param = #{error[:param]}"
     InvalidRequestError.new(error[:message], error[:param], rcode, rbody, error_obj)
   end
 
