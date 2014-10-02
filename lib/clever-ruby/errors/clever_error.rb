@@ -47,7 +47,7 @@ module Clever
     #   puts err.to_s
     def to_s
       status_string = @http_status.nil? ? '' : "(Status #{@http_status}) "
-      "#{status_string}#{@message} (Opts: #{@opts.inspect})"
+      "#{status_string}#{@message} (Opts: #{@opts})"
     end
   end
 end
