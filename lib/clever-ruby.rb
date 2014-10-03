@@ -62,6 +62,20 @@ module Clever
       configuration.api_key
     end
 
+    # Retrieve the configured timeout
+    # @api private
+    # @return [Fixnum] Configuration timeout
+    def timeout
+      configuration.timeout
+    end
+
+    # Retrieve the configured open timeout
+    # @api private
+    # @return [Fixnum] Open timeout
+    def open_timeout
+      configuration.open_timeout
+    end
+
     # Retrieve your stored API token
     # @api private
     # @return [String] API token
