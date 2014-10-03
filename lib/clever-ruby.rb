@@ -20,6 +20,7 @@ require 'clever-ruby/api_operations/page'
 require 'clever-ruby/util'
 require 'clever-ruby/json'
 require 'clever-ruby/configuration'
+require 'clever-ruby/options'
 
 # Resources
 require 'clever-ruby/clever_object'
@@ -59,6 +60,20 @@ module Clever
     # @return [String] API key
     def api_key
       configuration.api_key
+    end
+
+    # Retrieve the configured timeout
+    # @api private
+    # @return [Fixnum] Configuration timeout
+    def timeout
+      configuration.timeout
+    end
+
+    # Retrieve the configured open timeout
+    # @api private
+    # @return [Fixnum] Open timeout
+    def open_timeout
+      configuration.open_timeout
     end
 
     # Retrieve your stored API token
@@ -130,18 +145,7 @@ module Clever
 
     headers[:Authorization] = 'Bearer ' + Clever.token if Clever.token
 
-    opts = {
-      method: method,
-      url: url,
-      headers: headers,
-      open_timeout: 30,
-      payload: payload,
-      timeout: 120
-    }
-    if Clever.api_key
-      opts[:user] = Clever.api_key
-      opts[:password] = ''
-    end
+    opts = Options.new(method, url, headers, payload)
     opts
   end
 
@@ -178,7 +182,7 @@ module Clever
     rescue MultiJson::DecodeError
       raise APIError.new(
         "Invalid response object from API: #{rbody.inspect} (HTTP response code was #{rcode})",
-        rcode, rbody)
+        rcode, rbody, nil, opts)
     end
 
     resp
@@ -188,30 +192,30 @@ module Clever
 
   # Execute an HTTP request safely
   # @api private
-  # @param opts [Hash] Definition of the request to make
+  # @param opts [Clever::Options] Definition of the request to make
   # @return [String] Request results
   # @raise [APIConnectionError] Request failure
   def self.execute_request(opts)
     begin
-      request = RestClient::Request.execute opts
+      request = RestClient::Request.execute opts.request_opts
     rescue SocketError => e
-      handle_restclient_error e
+      handle_restclient_error e, opts
     rescue NoMethodError => e
       # TODO: investigate
       # Work around RestClient bug
       if e.message =~ /\WRequestFailed\W/
-        handle_restclient_error APIConnectionError.new 'Unexpected HTTP response code'
+        handle_restclient_error APIConnectionError.new('Unexpected HTTP response code'), opts
       else raise
       end
     rescue RestClient::ExceptionWithResponse => e
       rcode = e.http_code
       rbody = e.http_body
       if rcode && rbody
-        handle_api_error rcode, rbody
-      else handle_restclient_error e
+        handle_api_error rcode, rbody, opts
+      else handle_restclient_error e, opts
       end
     rescue RestClient::Exception, Errno::ECONNREFUSED => e
-      handle_restclient_error e
+      handle_restclient_error e, opts
     end
 
     request
@@ -222,7 +226,7 @@ module Clever
   # @param e [Error] Error to handle
   # @return [nil]
   # @raise [APIConnectionError] Standardized error for request failures
-  def self.handle_restclient_error(e)
+  def self.handle_restclient_error(e, opts = nil)
     case e
     when RestClient::ServerBrokeConnection, RestClient::RequestTimeout
       message = "Could not connect to Clever (#{configuration.api_base}). " \
@@ -234,7 +238,7 @@ module Clever
     else
       message = 'Unexpected error communicating with Clever.'
     end
-    message += "\n\n(Network error: #{e.message})"
+    message += "\n\n(Network error: #{e.message}) (Opts: #{opts})"
     fail APIConnectionError, message
   end
 
@@ -244,7 +248,7 @@ module Clever
   # @param rbody [String] response body
   # @return [nil]
   # @raise [CleverError] Clever error corresponding to the failure observed
-  def self.handle_api_error(rcode, rbody)
+  def self.handle_api_error(rcode, rbody, opts)
     begin
       error_obj = Clever::JSON.load rbody
       error = error_obj[:error]
@@ -252,41 +256,41 @@ module Clever
     rescue MultiJson::DecodeError, CleverError
       raise APIError.new(
         "Invalid response object from API: #{rbody.inspect} (HTTP response code was #{rcode})",
-        rcode, rbody)
+        rcode, rbody, nil, opts)
     end
 
     case rcode
     when 400, 404 then
-      fail invalid_request_error error, rcode, rbody, error_obj
+      fail invalid_request_error error, rcode, rbody, error_obj, opts
     when 401
-      fail authentication_error error, rcode, rbody, error_obj
+      fail authentication_error error, rcode, rbody, error_obj, opts
     else
-      fail api_error error, rcode, rbody, error_obj
+      fail api_error error, rcode, rbody, error_obj, opts
     end
   end
 
   # Generate an InvalidRequestError
   # @api private
   # @return [InvalidRequestError]
-  def self.invalid_request_error(error, rcode, rbody, error_obj)
+  def self.invalid_request_error(error, rcode, rbody, error_obj, opts)
     if error.is_a? Hash
-      InvalidRequestError.new error[:message], error[:param], rcode, rbody, error_obj
+      InvalidRequestError.new error[:message], error[:param], rcode, rbody, error_obj, opts
     else
-      InvalidRequestError.new error, '', rcode, rbody, error_obj
+      InvalidRequestError.new error, '', rcode, rbody, error_obj, opts
     end
   end
 
   # Generate an AuthenticationError
   # @api private
   # @return [AuthenticationError]
-  def self.authentication_error(error, rcode, rbody, error_obj)
-    AuthenticationError.new error[:message], rcode, rbody, error_obj
+  def self.authentication_error(error, rcode, rbody, error_obj, opts)
+    AuthenticationError.new error[:message], rcode, rbody, error_obj, opts
   end
 
   # Generate an APIError
   # @api private
   # @return [APIError]
-  def self.api_error(error, rcode, rbody, error_obj)
-    APIError.new error[:message], rcode, rbody, error_obj
+  def self.api_error(error, rcode, rbody, error_obj, opts)
+    APIError.new error[:message], rcode, rbody, error_obj, opts
   end
 end
