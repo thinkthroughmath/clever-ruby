@@ -145,7 +145,7 @@ module Clever
 
     headers[:Authorization] = 'Bearer ' + Clever.token if Clever.token
 
-    opts = Options.new(method, url, headers, 30, payload, 120)
+    opts = Options.new(method, url, headers, payload)
     opts
   end
 

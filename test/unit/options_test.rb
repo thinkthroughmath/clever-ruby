@@ -5,7 +5,7 @@ describe Clever::Options do
   describe :with_authorization_token do
     before do
       @headers = { Authorization: 'Bearer CLEVER_TOKEN', AnotherHeader: 'Something not sensitive' }
-      @opts = Clever::Options.new('method', 'https://api.clever.com', @headers, 30, 'payload', 120)
+      @opts = Clever::Options.new('method', 'https://api.clever.com', @headers, 'payload')
     end
 
     it 'provides a string with a masked Authorization token' do
@@ -22,7 +22,7 @@ describe Clever::Options do
         config.api_key = 'DEMO_KEY'
       end
       @headers = { AnotherHeader: 'Something not sensitive' }
-      @opts = Clever::Options.new('method', 'https://api.clever.com', @headers, 30, 'payload', 120)
+      @opts = Clever::Options.new('method', 'https://api.clever.com', @headers, 'payload')
     end
 
     it 'provides a string with a masked Authorization token' do
