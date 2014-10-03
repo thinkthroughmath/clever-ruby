@@ -31,6 +31,11 @@ module Clever
     # @return [Hash]
     attr_reader :headers
 
+    # Read configured api key
+    # @api private
+    # @return [String]
+    attr_reader :api_key
+
     # Initialize options
     # @api private
     # @param method [String]
@@ -45,6 +50,7 @@ module Clever
       @open_timeout = Clever.open_timeout
       @payload = payload
       @timeout = Clever.timeout
+      @api_key = Clever.api_key
     end
 
     # Returns a string version suitable for logs
@@ -66,8 +72,8 @@ module Clever
         payload: payload,
         timeout: timeout
       }
-      if Clever.api_key
-        opts[:user] = Clever.api_key
+      if api_key
+        opts[:user] = api_key
         opts[:password] = ''
       end
       opts
@@ -81,7 +87,7 @@ module Clever
     # @return [Hash] Request options with sensitive info masked
     def clean_opts(opts)
       opts[:headers] = headers_without_sensitive_info
-      opts[:user] = user_api_key_without_sensitive_info if Clever.api_key
+      opts[:user] = user_api_key_without_sensitive_info if api_key
       opts
     end
 
@@ -96,7 +102,7 @@ module Clever
     # @api private
     # @return [String]
     def user_api_key_without_sensitive_info
-      format_sensitive_string(Clever.api_key)
+      format_sensitive_string(api_key)
     end
 
     # Formats a string that contains sensitive info
