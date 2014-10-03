@@ -11,7 +11,7 @@ module Clever
     # @return [String]
     attr_reader :url
 
-    # Read request open timeout
+    # Read configured open timeout
     # @api private
     # @return [Fixnum]
     attr_reader :open_timeout
@@ -21,7 +21,7 @@ module Clever
     # @return [String]
     attr_reader :payload
 
-    # Read request timeout
+    # Read configured timeout
     # @api private
     # @return [Fixnum]
     attr_reader :timeout
@@ -36,18 +36,15 @@ module Clever
     # @param method [String]
     # @param url [String]
     # @param headers [Hash]
-    # @param open_timeout [Fixnum]
     # @param payload [String]
-    # @param timeout [Fixnum]
     # @return [Clever::Options]
-    # rubocop: disable ParameterLists
-    def initialize(method, url, headers, open_timeout, payload, timeout)
+    def initialize(method, url, headers, payload)
       @method = method
       @url = url
       @headers = headers
-      @open_timeout = open_timeout
+      @open_timeout = Clever.open_timeout
       @payload = payload
-      @timeout = timeout
+      @timeout = Clever.timeout
     end
 
     # Returns a string version suitable for logs
