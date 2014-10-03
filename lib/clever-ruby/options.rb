@@ -40,8 +40,8 @@ module Clever
     # @param payload [String]
     # @param timeout [Fixnum]
     # @return [Clever::Options]
-    # rubocop: disable ParameterLists
-    def initialize(method, url, headers, open_timeout, payload, timeout)
+    def initialize(method, url, headers,                  # rubocop: disable ParameterLists
+                   open_timeout, payload, timeout)
       @method = method
       @url = url
       @headers = headers
