@@ -1,5 +1,5 @@
 module Clever
-  # Represents an error outputted bythe Clever API
+  # Represents an error output by the Clever API
   class CleverError < StandardError
     # Access error Message
     # @api public
@@ -32,11 +32,12 @@ module Clever
     # Create CleverError instance
     # @api private
     # @return [Clever::CleverError]
-    def initialize(message = nil, http_status = nil, http_body = nil, json_body = nil)
+    def initialize(message = nil, http_status = nil, http_body = nil, json_body = nil, opts = nil)
       @message = message
       @http_status = http_status
       @http_body = http_body
       @json_body = json_body
+      @opts = opts
     end
 
     # Output CleverError instance as a human-readable string
@@ -46,7 +47,7 @@ module Clever
     #   puts err.to_s
     def to_s
       status_string = @http_status.nil? ? '' : "(Status #{@http_status}) "
-      "#{status_string}#{@message}"
+      "#{status_string}#{@message} (Opts: #{@opts})"
     end
   end
 end
