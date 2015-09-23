@@ -34,14 +34,14 @@ describe Clever do
       @options = Clever.create_request_opts method, url, params, headers
     end
     it 'sets method and url' do
-      assert_equal 'get', @options[:method], 'Method not set properly'
+      assert_equal 'get', @options.method, 'Method not set properly'
       assert_equal(
         'https://api.clever.com/quotes?education=powerful%20weapon',
-        @options[:url],
+        @options.url,
         'URL not formed properly with params')
     end
     it 'adds tracking headers' do
-      headers = @options[:headers]
+      headers = @options.headers
       assert headers.key?(:authorization), 'Did not set authorization header'
       assert_match(/Bearer/, headers[:authorization])
       assert headers.key?(:user_agent), 'Did not set User Agent header'
