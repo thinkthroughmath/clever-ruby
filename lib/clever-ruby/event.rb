@@ -21,7 +21,7 @@ module Clever
     def object
       klass = APIResource.named type_pieces[0]
       klass ||= CleverObject
-      klass.construct_from data[:object]
+      klass.construct_from data[:object].merge(auth_token: auth_token)
     end
 
     # Get previous attributes before the event
