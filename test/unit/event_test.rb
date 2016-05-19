@@ -8,7 +8,8 @@ describe Clever::Event do
       data: {
         object: { id: '512bb9f2ca5e6fa77506133f' }
       },
-      id: '512bb9f2ca5e6fa775061340'
+      id: '512bb9f2ca5e6fa775061340',
+      auth_token: 'blahblahblah'
     )
 
     @updated_event = Clever::Event.construct_from(
@@ -20,12 +21,14 @@ describe Clever::Event do
           last_modified: '2013-03-11T15:38:58.558Z'
         }
       },
-      id: '514767bf80833fb55b1c2dd7'
+      id: '514767bf80833fb55b1c2dd7',
+      auth_token: 'blahblahblah'
     )
   end
 
   it 'creates a clever object for the object the event is about' do
     @event.object.must_be_instance_of Clever::Section
+    @event.object.auth_token.must_equal 'blahblahblah'
   end
 
   it 'knows what action the event is about (created/updated/deleted)' do
