@@ -68,9 +68,9 @@ module Clever
     # @api private
     # @return [APIResource]
     def self.named(name)
-      name = name.to_s.downcase
+      name = name.to_s.downcase.gsub('_', '')
       matching = resources.select do |res|
-        (name == res.shortname) || (name == res.plural)
+        (name == res.shortname.gsub('_', '')) || (name == res.plural.gsub('_', ''))
       end
       return nil if matching.empty?
       matching.first
