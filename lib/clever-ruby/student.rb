@@ -23,7 +23,7 @@ module Clever
     # @api private
     # @return [Array]
     def optional_attributes
-      [:student_number, :state_id, :location, :gender, :dob, :grade, :frl_status,
+      [:schools, :student_number, :state_id, :location, :gender, :dob, :grade, :frl_status,
        :race, :hispanic_ethnicity, :email, :credentials, :ell_status, :iep_status]
     end
   end
